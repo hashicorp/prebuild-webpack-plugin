@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "jest": "^24.8.0",
+    "webpack": "^4.31.0"
+  }
+}
