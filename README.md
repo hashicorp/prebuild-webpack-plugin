@@ -33,7 +33,7 @@ plugins: [
 
 ## Options
 
-### files
+### fileOptions
 
 > `object` | optional
 
