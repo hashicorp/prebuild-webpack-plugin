@@ -19,13 +19,15 @@ npm install --save prebuild-webpack-plugin
 ```js
 plugins: [
     new PrebuildPlugin({
-      // if present, provides an array to `build` of all files relative to the project root
-      // that match this pattern, ignoring X, and only fires `watch` if the changedFile matches
-      files: { matcher: /\.md$/, ignore: ['node_modules', 'docs/**/*'], addFilesAsDependencies: true },
-      // function that runs on compile, and when dev mode starts for the first time only
-      build: (compiler, compilation, matchedFiles = []) => {},
-      // function that runs each time webpack rebuilds in dev mode
-      watch: (compiler, compilation, changedFile) => {}
+      build: (compiler, compilation, matchedFiles) => {
+        // function that runs on compile, and when dev mode starts for the first time only
+      },
+      watch: (compiler, compilation, changedFile) => {
+        // function that runs each time webpack rebuilds in dev mode
+      },
+      // the files object allows for file matching, providing an array
+      // of matching files as the last parameter to the `build` option
+      files: { matcher: '**/*.md', options: {}, addFilesAsDependencies: true }
     }),
     ...
 ]
@@ -33,19 +35,9 @@ plugins: [
 
 ## Options
 
-### files
-
-> `object` | optional
-
-| Property                 | Type      | Description                                                                                                                             |
-| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `pattern`                | `string`  | A [minimatch](https://github.com/isaacs/minimatch) glob pattern. Matched files are provided as the last parameter to the `build` option |
-| `options`                | `object`  | A glob options object. Options documented here: https://github.com/isaacs/node-glob#option                                              |
-| `addFilesAsDependencies` | `boolean` | Flag indicating whether or not to explicitly add matched files to webpack's dependency tree.                                            |
-
 ### build
 
-> function(compiler: any, compilation: any, matchedFiles: string[]): Promise\<any\>
+> function(compiler: any, compilation: any, matchedFiles: string[]): Promise\<any\> | required
 
 A function that's called **once**, before webpack runs initial build
 
@@ -55,10 +47,20 @@ A function that's called **once**, before webpack runs initial build
 
 ### watch
 
-> function(compiler: any, compilation: any, changedFile: string[]): Promise\<any\>
+> function(compiler: any, compilation: any, changedFile: string[]): Promise\<any\> | optional
 
-A function that's called **each time webpack rebuilds** in dev mode. If `files.matcher` is present, this function will only run if `changedFile` matches `files.matcher`.
+A function that's called **each time webpack rebuilds** in dev mode.
 
 - `compiler`: An instance of the webpack compiler
 - `compilation`: An instance of the webpack compilation
 - `changedFile`: Most recently changed file from previous compilation
+
+### files
+
+> `object` | optional
+
+| Property                 | Type      | Description                                                                                                                             |
+| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `pattern`                | `string`  | A [minimatch](https://github.com/isaacs/minimatch) glob pattern. Matched files are provided as the last parameter to the `build` option |
+| `options`                | `object`  | All valid value documented [here](https://github.com/isaacs/node-glob#option)                                                           |
+| `addFilesAsDependencies` | `boolean` | Flag indicating whether or not to explicitly add matched files to webpack's dependency tree.                                            |
