@@ -62,5 +62,5 @@ A function that's called **each time webpack rebuilds** in dev mode.
 | Property                 | Type      | Description                                                                                                                             |
 | ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `pattern`                | `string`  | A [minimatch](https://github.com/isaacs/minimatch) glob pattern. Matched files are provided as the last parameter to the `build` option |
-| `options`                | `object`  | All valid value documented [here](https://github.com/isaacs/node-glob#option)                                                           |
+| `options`                | `object`  | All valid object properties are documented [here](https://github.com/isaacs/node-glob#option)                                           |
 | `addFilesAsDependencies` | `boolean` | Flag indicating whether or not to explicitly add matched files to webpack's dependency tree.                                            |
