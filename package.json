@@ -4,7 +4,8 @@
   "description": "Process files before starting your webpack build",
   "main": "index.js",
   "dependencies": {
-    "glob": "^7.1.4"
+    "glob": "^7.1.4",
+    "minimatch": "^3.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",

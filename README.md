@@ -26,7 +26,7 @@ plugins: [
         // function that runs each time webpack rebuilds in dev mode
       },
       // the files object allows for file matching, providing an array
-      // of matching files as the last parameter to the `build` option
+      // of matching files as the last parameter to the `build` option.
       files: { matcher: '**/*.md', options: {}, addFilesAsDependencies: true }
     }),
     ...
@@ -39,28 +39,28 @@ plugins: [
 
 > function(compiler: any, compilation: any, matchedFiles: string[]): Promise\<any\> | required
 
-A function that's called **once**, before webpack runs initial build
+A function that's called **once**, before webpack runs initial build.
 
-- `compiler`: An instance of the webpack compiler
-- `compilation`: An instance of the webpack compilation
+- `compiler`: An instance of the webpack compiler.
+- `compilation`: An instance of the webpack compilation.
 - `matchedFiles`: Returns matches from `files.matcher` if present.
 
 ### watch
 
 > function(compiler: any, compilation: any, changedFile: string[]): Promise\<any\> | optional
 
-A function that's called **each time webpack rebuilds** in dev mode.
+A function that's called **each time webpack rebuilds** in dev mode. If `files.pattern` is provided, this function only fires when the last changed file matches with provided pattern.
 
-- `compiler`: An instance of the webpack compiler
-- `compilation`: An instance of the webpack compilation
-- `changedFile`: Most recently changed file from previous compilation
+- `compiler`: An instance of the webpack compiler.
+- `compilation`: An instance of the webpack compilation.
+- `changedFile`: Most recently changed file from previous compilation.
 
 ### files
 
 > `object` | optional
 
-| Property                 | Type      | Description                                                                                                                             |
-| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `pattern`                | `string`  | A [minimatch](https://github.com/isaacs/minimatch) glob pattern. Matched files are provided as the last parameter to the `build` option |
-| `options`                | `object`  | All valid object properties are documented [here](https://github.com/isaacs/node-glob#option)                                           |
-| `addFilesAsDependencies` | `boolean` | Flag indicating whether or not to explicitly add matched files to webpack's dependency tree.                                            |
+| Property                 | Type      | Description                                                                                                                              |
+| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `pattern`                | `string`  | A [minimatch](https://github.com/isaacs/minimatch) glob pattern. Matched files are provided as the last parameter to the `build` option. |
+| `options`                | `object`  | All valid object properties are documented [here](https://github.com/isaacs/node-glob#option).                                           |
+| `addFilesAsDependencies` | `boolean` | Flag indicating whether or not to explicitly add matched files to webpack's dependency tree.                                             |

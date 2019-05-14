@@ -1,5 +1,6 @@
 const { promisify } = require("util");
 const glob = promisify(require("glob"));
+const minimatch = require("minimatch");
 
 class PrebuildWepbackPlugin {
   constructor({ build, files = {}, watch = () => {} } = {}) {
@@ -26,14 +27,6 @@ class PrebuildWepbackPlugin {
     })();
   }
 
-  set changedFile(changedFile) {
-    this._changedFile = changedFile;
-  }
-
-  get changedFile() {
-    return this._changedFile;
-  }
-
   apply(compiler) {
     compiler.hooks.beforeRun.tapPromise(
       "PrebuildWebpackPlugin",
@@ -52,9 +45,17 @@ class PrebuildWepbackPlugin {
           return this.build(compiler, compilation, matchedFiles);
         }
 
-        this.changedFile = compilation.watchFileSystem.watcher.mtimes;
-        if (!this.changedFile.length) return Promise.resolve();
-        return this.watch(compiler, compilation, this.changedFile);
+        if (!this.files.pattern) return Promise.resolve();
+
+        const changedFile = Object.keys(
+          compilation.watchFileSystem.watcher.mtimes
+        );
+
+        if (!changedFile.length) return Promise.resolve();
+
+        const changedMatch = minimatch.match(changedFile, this.files.pattern);
+        if (!changedMatch.length) return Promise.resolve();
+        return this.watch(compiler, compilation, changedFile);
       }
     );
 
