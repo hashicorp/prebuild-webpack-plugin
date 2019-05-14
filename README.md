@@ -33,15 +33,15 @@ plugins: [
 
 ## Options
 
-### fileOptions
+### files
 
 > `object` | optional
 
-| Property                 | Type       | Description                                                                                  |
-| ------------------------ | ---------- | -------------------------------------------------------------------------------------------- |
-| `matcher`                | `RegExp`   | If provided, provides an array of matched files to the `build` function.                     |
-| `ignore`                 | `string[]` | Accepts a list of string paths or glob patterns to exclude from any matched files.           |
-| `addFilesAsDependencies` | `boolean`  | Flag indicating whether or not to explicitly add matched files to webpack's dependency tree. |
+| Property                 | Type      | Description                                                                                                                             |
+| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `pattern`                | `string`  | A [minimatch](https://github.com/isaacs/minimatch) glob pattern. Matched files are provided as the last parameter to the `build` option |
+| `options`                | `object`  | A glob options object. Options documented here: https://github.com/isaacs/node-glob#option                                              |
+| `addFilesAsDependencies` | `boolean` | Flag indicating whether or not to explicitly add matched files to webpack's dependency tree.                                            |
 
 ### build
 
@@ -57,7 +57,7 @@ A function that's called **once**, before webpack runs initial build
 
 > function(compiler: any, compilation: any, changedFile: string[]): Promise\<any\>
 
-A function that's called each time webpack rebuilds in dev mode. If `files.matcher` is present, this function will only run if `changedFile` matches `files.matcher`.
+A function that's called **each time webpack rebuilds** in dev mode. If `files.matcher` is present, this function will only run if `changedFile` matches `files.matcher`.
 
 - `compiler`: An instance of the webpack compiler
 - `compilation`: An instance of the webpack compilation
