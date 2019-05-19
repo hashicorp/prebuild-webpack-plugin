@@ -2,28 +2,25 @@
 
 ## The Problem
 
-Describe problem...
-
-## The Solution
-
-Describe solution...
+In some cases, you may need to do some file processing/manipulation before your webpack build starts. For instance, if you needed to transform files or do some I/O for certain files before webpack's build process starts, this plugin provides a nice interface for completing these specific tasks
 
 ## Installation
 
-```
+```shell
 npm install --save prebuild-webpack-plugin
 ```
 
 ## Usage
 
-```js
+```javascript
 plugins: [
     new PrebuildPlugin({
       build: (compiler, compilation, matchedFiles) => {
-        // function that runs on compile, and when dev mode starts for the first time only
+        // function that runs on compile, as well as when dev mode starts for the first time only
       },
       watch: (compiler, compilation, changedFile) => {
-        // function that runs each time webpack rebuilds in dev mode
+        // function that runs each time webpack rebuilds in dev mode. if `files.pattern` is provided,
+        // this function will only fire if the most recently changed file matches the specified pattern
       },
       // the files object allows for file matching, providing an array
       // of matching files as the last parameter to the `build` option.

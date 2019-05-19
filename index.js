@@ -2,7 +2,7 @@ const { promisify } = require("util");
 const glob = promisify(require("glob"));
 const minimatch = require("minimatch");
 
-class PrebuildWepbackPlugin {
+class PrebuildWebpackPlugin {
   constructor({ build, files = {}, watch = () => {} } = {}) {
     if (!build) {
       throw new Error(
@@ -10,9 +10,10 @@ class PrebuildWepbackPlugin {
       );
     }
 
+    this.firstRun = true;
+
     this.build = build;
     this.files = files;
-    this.firstRun = true;
     this.watch = watch;
   }
 
@@ -21,7 +22,9 @@ class PrebuildWepbackPlugin {
       return this.files.pattern
         ? await glob(
             this.files.pattern,
-            this.files.options ? this.files.options : {}
+            this.files.options
+              ? { ...this.files.options, realpath: true }
+              : { realpath: true }
           )
         : [];
     })();
@@ -53,8 +56,12 @@ class PrebuildWepbackPlugin {
 
         if (!changedFile.length) return Promise.resolve();
 
-        const changedMatch = minimatch.match(changedFile, this.files.pattern);
-        if (!changedMatch.length) return Promise.resolve();
+        if (this.files.pattern) {
+          const changedMatch = minimatch.match(changedFile, this.files.pattern);
+          if (!changedMatch.length) return Promise.resolve();
+          return this.watch(compiler, compilation, changedMatch);
+        }
+
         return this.watch(compiler, compilation, changedFile);
       }
     );
@@ -75,4 +82,6 @@ class PrebuildWepbackPlugin {
   }
 }
 
-export default PrebuildWepbackPlugin;
+module.exports = {
+  PrebuildWebpackPlugin
+};

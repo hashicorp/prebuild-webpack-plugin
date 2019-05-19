@@ -2,7 +2,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const webpack = require("webpack");
 const merge = require("webpack-merge");
-const PrebuildWebpackPlugin = require("../index.js").default;
+const { PrebuildWebpackPlugin } = require("../index.js");
 
 const getConfig = type => {
   return {
@@ -117,7 +117,7 @@ describe("PrebuildWebpackPlugin", () => {
   });
 
   describe("watch", () => {
-    jest.setTimeout(30000);
+    jest.setTimeout(10000);
 
     xit("provides a changed file", done => {
       const config = merge(getConfig("files"), {
@@ -131,7 +131,9 @@ describe("PrebuildWebpackPlugin", () => {
             },
             build: () => {},
             watch: (compiler, compilation, changedFile) => {
-              debugger;
+              console.log(changedFile);
+              expect(changedFile.length).toBe(1);
+              done();
             }
           })
         ],
@@ -141,25 +143,20 @@ describe("PrebuildWebpackPlugin", () => {
         }
       });
       const compiler = webpack(config);
-      const watching = compiler.watch({}, (err, stats) => {
-        const changedFile = stats.compilation.options.plugins[0].changedFile;
-        expect(changedFile).toHaveProperty(
-          path.resolve(getConfig("files").context, "one.json")
-        );
-      });
+      const watching = compiler.watch({}, (err, stats) => {});
 
       setTimeout(() => {
         fs.writeFileSync(
           path.resolve(getConfig("files").context, "one.json"),
-          '{"one" : "yo"}'
+          '{"one" : "one"}'
         );
-      }, 4000);
+      }, 3000);
 
       setTimeout(() => {
         watching.close(() => {
           done();
         });
-      }, 10000);
+      }, 8000);
     });
   });
 });
