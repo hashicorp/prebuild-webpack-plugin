@@ -30,6 +30,12 @@ class PrebuildWebpackPlugin {
     })();
   }
 
+  getChangedFile(compiler) {
+    const { watchFileSystem } = compiler;
+    const watcher = watchFileSystem.watcher || watchFileSystem.wfs.watcher;
+    return Object.keys(watcher.mtimes);
+  }
+
   apply(compiler) {
     compiler.hooks.beforeRun.tapPromise(
       "PrebuildWebpackPlugin",
@@ -50,9 +56,7 @@ class PrebuildWebpackPlugin {
 
         if (!this.files.pattern) return Promise.resolve();
 
-        const changedFile = Object.keys(
-          compilation.watchFileSystem.watcher.mtimes
-        );
+        const changedFile = this.getChangedFile(compiler);
 
         if (!changedFile.length) return Promise.resolve();
 
