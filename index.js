@@ -54,6 +54,15 @@ class PrebuildWebpackPlugin {
           return this.build(compiler, compilation, matchedFiles);
         }
 
+        // Next.js-specific Optimization
+        // As documented here: https://nextjs.org/docs#customizing-webpack-config
+        // Next.js executes webpack twice, once for the server, and once for the client
+        // To prevent doing work 2x, we choose (arbitrarily) the 'client' run,
+        // immediately returning on anything else
+        if (compilation.name && compilation.name !== "client") {
+          return Promise.resolve();
+        }
+
         if (!this.files.pattern) return Promise.resolve();
 
         const changedFile = this.getChangedFile(compiler);
