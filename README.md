@@ -24,7 +24,7 @@ plugins: [
       },
       // the files object allows for file matching, providing an array
       // of matching files as the last parameter to the `build` option.
-      files: { matcher: '**/*.md', options: {}, addFilesAsDependencies: true }
+      files: { matcher: '**/*.md', options: {}, addFilesAsDependencies: true },
     }),
     ...
 ]
@@ -61,3 +61,9 @@ A function that's called **each time webpack rebuilds** in dev mode. If `files.p
 | `pattern`                | `string`  | A [minimatch](https://github.com/isaacs/minimatch) glob pattern. Matched files are provided as the last parameter to the `build` option. |
 | `options`                | `object`  | All valid object properties are documented [here](https://github.com/isaacs/node-glob#option).                                           |
 | `addFilesAsDependencies` | `boolean` | Flag indicating whether or not to explicitly add matched files to webpack's dependency tree.                                             |
+
+### clearCacheOnUpdate
+
+> `boolean` | optional | default: `false`
+
+This plugin will read matched files on initial bootup only, at the moment. As such, if you add a new file to the tree, there may be issues with getting it to respond properly to updates without restarting your build process. If you set this option to `true`, the plugin will re-read the file tree every time a watch update event triggers. This will incur a reasonably large performance penalty, but properly handle newly added files consistently.
