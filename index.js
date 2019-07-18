@@ -8,7 +8,8 @@ module.exports = class PrebuildWebpackPlugin {
     build,
     files = {},
     watch = () => {},
-    clearCacheOnUpdate = false
+    clearCacheOnUpdate = false,
+    compilationNameFilter
   } = {}) {
     if (!build) {
       throw new Error(
@@ -17,30 +18,26 @@ module.exports = class PrebuildWebpackPlugin {
     }
 
     this.firstRun = true
-
     this.build = build
     this.files = files
     this.watch = watch
+    this.compilationNameFilter = compilationNameFilter
     this.clearCacheOnUpdate = clearCacheOnUpdate
-    this.matchedFilesCache = null
   }
 
-  get matchedFiles() {
+  async getMatchedFiles() {
+    if (this.matchedFilesCache) return this.matchedFilesCache
+    if (!this.files.pattern) return []
+
     debug('start: get matched files')
-    return (async () => {
-      if (this.matchedFilesCache) return this.matchedFilesCache
-      const files = this.files.pattern
-        ? await glob(
-            this.files.pattern,
-            this.files.options
-              ? { ...this.files.options, realpath: true }
-              : { realpath: true }
-          )
-        : []
-      debug('finish: get matched files')
-      this.matchedFilesCache = files
-      return files
-    })()
+    const options = this.files.options
+      ? { ...this.files.options, realpath: true }
+      : { realpath: true }
+    const files = await glob(this.files.pattern, options)
+    this.matchedFilesCache = files
+    debug('finish: get matched files')
+
+    return files
   }
 
   getChangedFile(compiler) {
@@ -50,29 +47,41 @@ module.exports = class PrebuildWebpackPlugin {
     return changedFile
   }
 
+  // This option was introduced for efficient use within nextjs
+  // As documented here: https://nextjs.org/docs#customizing-webpack-config,
+  // nextjs executes webpack twice, once for the server, and once for the client
+  // To prevent doing work 2x, we will take the passed compilation name and only run
+  // the logic for that specific compilation. For nextjs, you want "client"
+  filterCompilation(compilation) {
+    if (!compilation.name || !this.compilationNameFilter) return false
+    return compilation.name !== this.compilationNameFilter
+  }
+
+  // If the user provided a matcher, we filter for those files to pass into the function
+  // Otherwise we just run the function.
+  async runInitialBuild(compiler, compilation) {
+    const matchedFiles = await this.getMatchedFiles()
+    return this.build(compiler, compilation, matchedFiles)
+  }
+
   apply(compiler) {
+    // The "beforeRun" hook runs only on single webpack build, triggering only once
     compiler.hooks.beforeRun.tapPromise(
       'PrebuildWebpackPlugin',
       async compilation => {
-        debug('running beforeRun hook')
-        const matchedFiles = await this.matchedFiles
-        return this.build(compiler, compilation, matchedFiles)
+        if (this.filterCompilation(compilation)) return Promise.resolve()
+        debug(`running "beforeRun" hook for compilation: ${compilation.name}`)
+        this.runInitialBuild(compiler, compilation)
       }
     )
 
+    // The "watchRun" hook runs only when using 'watch mode' with webpack, triggering
+    // every time that webpack recompiles on a change triggered by the watcher
     compiler.hooks.watchRun.tapPromise(
       'PrebuildWebpackPlugin',
       async compilation => {
-        // Next.js-specific Optimization
-        // As documented here: https://nextjs.org/docs#customizing-webpack-config
-        // Next.js executes webpack twice, once for the server, and once for the client
-        // To prevent doing work 2x, we choose (arbitrarily) the 'client' run,
-        // immediately returning on anything else
-        if (compilation.name && compilation.name !== 'client') {
-          return Promise.resolve()
-        }
-
-        debug(`running watchRun hook for compilation: ${compilation.name}`)
+        if (this.filterCompilation(compilation)) return Promise.resolve()
+        debug(`running "watchRun" hook for compilation: ${compilation.name}`)
 
         // By default we cache the matched files for speed. This has the drawback of
         // potentially having issues with new files that are added. If you're willing
@@ -85,39 +94,48 @@ module.exports = class PrebuildWebpackPlugin {
           this.matchedFilesCache = null
         }
 
+        // Since "watchRun" runs every time webpack compiles in watch mode, we limit the
+        // initial build to the first execution.
         if (this.firstRun) {
           this.firstRun = false
-          const matchedFiles = await this.matchedFiles
-          return this.build(compiler, compilation, matchedFiles)
+          this.runInitialBuild(compiler, compilation)
         }
 
+        // At this point we're done unless we have a file pattern matcher passed in
         if (!this.files.pattern) return Promise.resolve()
 
+        // If so, we get the file that was just changed, if there was one changed
         const changedFile = this.getChangedFile(compiler)
-
         if (!changedFile.length) return Promise.resolve()
 
-        if (this.files.pattern) {
-          const changedMatch = minimatch.match(changedFile, this.files.pattern)
-          if (!changedMatch.length) return Promise.resolve()
-          return this.watch(compiler, compilation, changedMatch)
-        }
+        // If the changed file doesn't match the provided pattern, we're done
+        const changedMatch = minimatch.match(changedFile, this.files.pattern)
+        if (!changedMatch.length) return Promise.resolve()
 
-        return this.watch(compiler, compilation, changedFile)
+        // If it does, we run the user-provided watch function
+        return this.watch(compiler, compilation, changedMatch)
       }
     )
 
-    compiler.hooks.emit.tapAsync(
+    // The "emit" hook runs before webpack is about to write out assets, at the end
+    // of the compile process.
+    compiler.hooks.emit.tapPromise(
       'PrebuildWebpackPlugin',
-      async (compilation, callback) => {
-        const matchedFiles = await this.matchedFiles
-        if (!matchedFiles.length) callback()
+      async compilation => {
+        if (this.filterCompilation(compilation)) return Promise.resolve()
+        debug(`running "emit" hook for compilation: ${compilation.name}`)
 
+        // Grab the matched files so we can add them as dependencies
+        // If there are none, we're done
+        const matchedFiles = await this.getMatchedFiles()
+        if (!matchedFiles.length) return Promise.resolve()
+
+        // Add all matched files as dependencies to webpack so that they are
         if (this.files.addFilesAsDependencies) {
           matchedFiles.map(f => compilation.fileDependencies.add(f))
         }
 
-        callback()
+        return Promise.resolve()
       }
     )
   }
