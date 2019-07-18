@@ -67,3 +67,9 @@ A function that's called **each time webpack rebuilds** in dev mode. If `files.p
 > `boolean` | optional | default: `false`
 
 This plugin will read matched files on initial bootup only, at the moment. As such, if you add a new file to the tree, there may be issues with getting it to respond properly to updates without restarting your build process. If you set this option to `true`, the plugin will re-read the file tree every time a watch update event triggers. This will incur a reasonably large performance penalty, but properly handle newly added files consistently.
+
+### compilationNameFilter
+
+> `string` | optional
+
+Some webpack build systems such as [next.js](https://nextjs.org/docs#customizing-webpack-config) run multiple webpack configs, one for the client and one for the server. If you only need your plugin to execute for one specific compilation, you can pass in the name of that compilation and the logic will only run for it. If you do happen to be using next.js, you want to pass in `client` here.
