@@ -1,5 +1,7 @@
 # Prebuild Webpack Plugin
 
+![build status](https://img.shields.io/circleci/build/github/hashicorp/prebuild-webpack-plugin.svg?style=flat-square)
+
 ## The Problem
 
 In some cases, you may need to do some file processing/manipulation before your webpack build starts. For instance, if you needed to transform files or do some I/O for certain files before webpack's build process starts, this plugin provides a nice interface for completing these specific tasks
