@@ -73,7 +73,7 @@ module.exports = class PrebuildWebpackPlugin {
     compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async compilation => {
       if (this.filterCompilation(compilation)) return Promise.resolve()
       debug(`running "beforeRun" hook for compilation: ${compilation.name}`)
-      this.runInitialBuild(compiler, compilation)
+      return this.runInitialBuild(compiler, compilation)
     })
 
     // The "watchRun" hook runs only when using 'watch mode' with webpack, triggering
@@ -97,7 +97,8 @@ module.exports = class PrebuildWebpackPlugin {
       // initial build to the first execution.
       if (this.firstRun) {
         this.firstRun = false
-        this.runInitialBuild(compiler, compilation)
+        debug('watch mode, running initial build only')
+        return this.runInitialBuild(compiler, compilation)
       }
 
       // At this point we're done unless we have a file pattern matcher passed in
