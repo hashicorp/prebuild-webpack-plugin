@@ -1,3 +1,4 @@
+const path = require('path')
 const { promisify } = require('util')
 const glob = promisify(require('glob'))
 const minimatch = require('minimatch')
@@ -34,14 +35,21 @@ module.exports = class PrebuildWebpackPlugin {
     if (this.matchedFilesCache) return this.matchedFilesCache
 
     debug('start: get matched files')
-    const options = this.files.options
-      ? { ...this.files.options, realpath: true }
-      : { realpath: true }
-    const files = await glob(this.files.pattern, options)
+    // glob resolves from either `options.cwd` or `process.cwd()` if not provided
+    // we replicate this option so we can return an absolute path
+    const root =
+      this.files.options && this.files.options.cwd
+        ? this.files.options.cwd
+        : process.cwd()
+
+    // run the glob matcher and set the cache
+    const files = await glob(this.files.pattern, this.files.options)
     this.matchedFilesCache = files
     debug('finish: get matched files')
 
-    return files
+    // glob returns paths relative to the root, but we want absolute paths, so we join
+    // the root on before returning
+    return files.map(f => path.join(root, f))
   }
 
   // Getting the file that changes per watch trigger is a bit involved when it comes
