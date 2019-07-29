@@ -64,7 +64,7 @@ A function that's called **each time webpack rebuilds** in dev mode. If `files.p
 | `options`                | `object`  | All valid object properties are documented [here](https://github.com/isaacs/node-glob#option).                                           |
 | `addFilesAsDependencies` | `boolean` | Flag indicating whether or not to explicitly add matched files to webpack's dependency tree.                                             |
 
-### clearCacheOnUpdate
+### clearMemoOnUpdate
 
 > `boolean` | optional | default: `false`
 
