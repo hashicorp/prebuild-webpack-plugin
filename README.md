@@ -26,7 +26,7 @@ plugins: [
       },
       // the files object allows for file matching, providing an array
       // of matching files as the last parameter to the `build` option.
-      files: { matcher: '**/*.md', options: {}, addFilesAsDependencies: true },
+      files: { pattern: '**/*.md', options: {}, addFilesAsDependencies: true },
     }),
     ...
 ]
