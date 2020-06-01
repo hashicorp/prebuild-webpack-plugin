@@ -26,7 +26,7 @@ plugins: [
       },
       // the files object allows for file matching, providing an array
       // of matching files as the last parameter to the `build` option.
-      files: { matcher: '**/*.md', options: {}, addFilesAsDependencies: true },
+      files: { pattern: '**/*.md', options: {}, addFilesAsDependencies: true },
     }),
     ...
 ]
@@ -42,7 +42,7 @@ A function that's called **once**, before webpack runs initial build.
 
 - `compiler`: An instance of the webpack compiler.
 - `compilation`: An instance of the webpack compilation.
-- `matchedFiles`: Returns matches from `files.matcher` if present.
+- `matchedFiles`: Returns matches from `files.pattern` if present.
 
 ### watch
 
