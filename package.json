@@ -1,6 +1,6 @@
 {
   "name": "prebuild-webpack-plugin",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Process files before starting your webpack build",
   "contributors": [
     "Kevin Pruett",
