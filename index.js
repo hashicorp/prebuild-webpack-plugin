@@ -11,7 +11,7 @@ module.exports = class PrebuildWebpackPlugin {
     build,
     files = {},
     watch = () => {},
-    clearCacheOnUpdate = false,
+    clearMemoOnUpdate = false,
     compilationNameFilter
   } = {}) {
     if (!build) {
@@ -25,14 +25,14 @@ module.exports = class PrebuildWebpackPlugin {
     this.files = files
     this.watch = watch
     this.compilationNameFilter = compilationNameFilter
-    this.clearCacheOnUpdate = clearCacheOnUpdate
+    this.clearMemoOnUpdate = clearMemoOnUpdate
   }
 
   // If the user provided a `files: { pattern }` config, this function will
   // go and fetch all the matching files from the filesystem.
   async getMatchedFiles() {
     if (!this.files.pattern) return []
-    if (this.matchedFilesCache) return this.matchedFilesCache
+    if (this.matchedFilesMemo) return this.matchedFilesMemo
 
     debug('start: get matched files')
     // glob resolves from either `options.cwd` or `process.cwd()` if not provided
@@ -42,9 +42,9 @@ module.exports = class PrebuildWebpackPlugin {
         ? this.files.options.cwd
         : process.cwd()
 
-    // run the glob matcher and set the cache
+    // run the glob matcher and memoize
     const files = await glob(this.files.pattern, this.files.options)
-    this.matchedFilesCache = files
+    this.matchedFilesMemo = files
     debug('finish: get matched files')
 
     // glob returns paths relative to the root, but we want absolute paths, so we join
@@ -90,15 +90,15 @@ module.exports = class PrebuildWebpackPlugin {
       if (this.filterCompilation(compilation)) return Promise.resolve()
       debug(`running "watchRun" hook for compilation: ${compilation.name}`)
 
-      // By default we cache the matched files for speed. This has the drawback of
+      // By default we memozie the matched files for speed. This has the drawback of
       // potentially having issues with new files that are added. If you're willing
       // to take the perf hit on every update in exchange for better new file detection
-      // you can enable this option and we'll clear the cache each watch round.
+      // you can enable this option and we'll clear the memo each watch round.
       // TODO: if we can get webpack to tell us when a new file was added, we could optimize
       // this such that it only ran in this condition.
-      if (this.clearCacheOnUpdate) {
-        debug('clearing matched files cache')
-        this.matchedFilesCache = null
+      if (this.clearMemoOnUpdate) {
+        debug('clearing matched files memo')
+        this.matchedFilesMemo = null
       }
 
       // Since "watchRun" runs every time webpack compiles in watch mode, we limit the

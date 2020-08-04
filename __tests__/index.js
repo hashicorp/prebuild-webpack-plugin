@@ -28,7 +28,7 @@ describe('PrebuildWebpackPlugin', () => {
       compiler.run(async (err, stats) => {
         if (err) return done(err)
         const matchedFiles = await stats.compilation.options.plugins[0]
-          .matchedFilesCache
+          .matchedFilesMemo
         expect(matchedFiles).toStrictEqual(undefined)
         done()
       })
@@ -51,7 +51,7 @@ describe('PrebuildWebpackPlugin', () => {
       compiler.run(async (err, stats) => {
         if (err) return done(err)
         const matchedFiles = await stats.compilation.options.plugins[0]
-          .matchedFilesCache
+          .matchedFilesMemo
         expect(matchedFiles.length).toBe(3)
         done()
       })
