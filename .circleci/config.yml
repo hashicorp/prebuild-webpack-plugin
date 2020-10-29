@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: circleci/node:latest
+      - image: docker.mirror.hashicorp.services/circleci/node:latest
     steps:
       - checkout
       - restore_cache:
