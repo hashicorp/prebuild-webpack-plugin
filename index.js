@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 const path = require('path')
 const { promisify } = require('util')
 const glob = promisify(require('glob'))
