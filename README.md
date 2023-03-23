@@ -1,3 +1,6 @@
+> **Note**
+> This repository is no longer maintained or in-use at HashiCorp. As of March 2023, the repository is archived.
+
 # Prebuild Webpack Plugin
 
 ![build status](https://img.shields.io/circleci/build/github/hashicorp/prebuild-webpack-plugin.svg?style=flat-square)
